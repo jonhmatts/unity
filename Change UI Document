@@ -1,0 +1,117 @@
+using UnityEngine;
+using UnityEngine.UIElements;
+using System.Collections;
+using System.Collections.Generic;
+
+public class ChangeUIDoc : MonoBehaviour
+{
+    public List<GameObject> uiDocuments;
+    public List<string> paginaSiguienteBotones;
+    public List<string> paginaAnteriorBotones;
+
+    private int currentUIIndex = 0;
+    private List<VisualElement> containers = new List<VisualElement>();
+    private Dictionary<string, Button> botonesPaginaSiguiente = new Dictionary<string, Button>();
+    private Dictionary<string, Button> botonesPaginaAnterior = new Dictionary<string, Button>();
+
+    private bool isTransitioning = false;
+
+    private void Start()
+    {
+        CollectUIContainers();
+
+        foreach (var container in containers)
+        {
+            foreach (string buttonName in paginaSiguienteBotones)
+            {
+                Button button = container.Q<Button>(buttonName);
+                if (button != null)
+                {
+                    button.clicked += () => StartCoroutine(TransitionToNextUI());
+                    botonesPaginaSiguiente.Add(buttonName, button);
+                }
+            }
+
+            foreach (string buttonName in paginaAnteriorBotones)
+            {
+                Button button = container.Q<Button>(buttonName);
+                if (button != null)
+                {
+                    button.clicked += () => StartCoroutine(TransitionToPreviousUI());
+                    botonesPaginaAnterior.Add(buttonName, button);
+                }
+            }
+        }
+
+        ShowUI(currentUIIndex);
+    }
+
+    private void CollectUIContainers()
+    {
+        foreach (var uiDocument in uiDocuments)
+        {
+            UIDocument uiDocComponent = uiDocument.GetComponent<UIDocument>();
+            if (uiDocComponent != null)
+            {
+                VisualElement container = uiDocComponent.rootVisualElement;
+                containers.Add(container);
+            }
+        }
+    }
+
+    public IEnumerator TransitionToNextUI()
+    {
+        if (isTransitioning)
+            yield break;
+
+        int nextUIIndex = (currentUIIndex + 1) % uiDocuments.Count;
+        yield return StartCoroutine(TransitionUI(currentUIIndex, nextUIIndex));
+        currentUIIndex = nextUIIndex;
+        ShowUI(currentUIIndex);
+    }
+
+    public IEnumerator TransitionToPreviousUI()
+    {
+        if (isTransitioning)
+            yield break;
+
+        int previousUIIndex = (currentUIIndex - 1 + uiDocuments.Count) % uiDocuments.Count;
+        yield return StartCoroutine(TransitionUI(currentUIIndex, previousUIIndex));
+        currentUIIndex = previousUIIndex;
+        ShowUI(currentUIIndex);
+    }
+
+    private float transitionDuration = 0.35f;
+
+    private IEnumerator TransitionUI(int fromIndex, int toIndex)
+    {
+        isTransitioning = true;
+
+        VisualElement fromUI = uiDocuments[fromIndex].GetComponent<UIDocument>().rootVisualElement;
+        VisualElement toUI = uiDocuments[toIndex].GetComponent<UIDocument>().rootVisualElement;
+
+        fromUI.AddToClassList("off_screen");
+        toUI.AddToClassList("on_screen");
+
+        yield return new WaitForSeconds(transitionDuration);
+
+        fromUI.RemoveFromClassList("off_screen");
+        toUI.RemoveFromClassList("on_screen");
+
+        fromUI.style.display = DisplayStyle.None;
+        toUI.style.display = DisplayStyle.Flex;
+
+        isTransitioning = false;
+    }
+
+    public void ShowUI(int index)
+    {
+        foreach (var container in containers)
+        {
+            container.style.display = DisplayStyle.None;
+        }
+
+        VisualElement currentUI = uiDocuments[index].GetComponent<UIDocument>().rootVisualElement;
+        currentUI.style.display = DisplayStyle.Flex;
+    }
+}
