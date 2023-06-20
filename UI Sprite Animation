@@ -1,0 +1,57 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+
+public class UISpriteAnimation : MonoBehaviour
+{
+    public RawImage m_RawImage;
+    public Texture[] m_TextureArray;
+    public float m_Speed = 0.02f;
+    public float m_PauseDuration = 2f;
+    public bool m_PlayOnStart = false;
+
+    private int m_IndexTexture;
+    private Coroutine m_CoroutineAnim;
+    private bool m_IsDone;
+
+    private void Start()
+    {
+        if (m_PlayOnStart)
+        {
+            Func_PlayUIAnim();
+        }
+    }
+
+    public void Func_PlayUIAnim()
+    {
+        m_IsDone = false;
+        m_CoroutineAnim = StartCoroutine(Func_PlayAnimUI());
+    }
+
+    public void Func_StopUIAnim()
+    {
+        m_IsDone = true;
+        StopCoroutine(m_CoroutineAnim);
+    }
+
+    private IEnumerator Func_PlayAnimUI()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(m_Speed);
+
+            m_RawImage.texture = m_TextureArray[m_IndexTexture];
+            m_IndexTexture = (m_IndexTexture + 1) % m_TextureArray.Length;
+
+            if (m_IndexTexture == 0)
+            {
+                yield return new WaitForSeconds(m_PauseDuration);
+            }
+
+            if (m_IsDone)
+            {
+                break;
+            }
+        }
+    }
+}
