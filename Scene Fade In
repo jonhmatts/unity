@@ -1,0 +1,47 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using System.Collections;
+
+public class SceneFadeIn : MonoBehaviour
+{
+    public float fadeDuration = 1f;
+
+    private RawImage fadeImage;
+    private float currentAlpha = 1f;
+
+    void Start()
+    {
+        fadeImage = CreateFadeImage();
+        StartCoroutine(FadeIn());
+    }
+
+    IEnumerator FadeIn()
+    {
+        while (currentAlpha > 0f)
+        {
+            currentAlpha -= Time.deltaTime / fadeDuration;
+            fadeImage.color = new Color(0f, 0f, 0f, currentAlpha);
+            yield return null;
+        }
+    }
+
+    private RawImage CreateFadeImage()
+    {
+        GameObject fadeObj = new GameObject("FadeImage");
+        fadeObj.transform.SetParent(transform);
+        RectTransform rectTransform = fadeObj.AddComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+
+        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 999;
+
+        RawImage fadeRawImage = fadeObj.AddComponent<RawImage>();
+        fadeRawImage.color = new Color(0f, 0f, 0f, 1f);
+
+        return fadeRawImage;
+    }
+}
