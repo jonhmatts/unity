@@ -1,0 +1,32 @@
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+
+public class ModifyVignetteIntensity : MonoBehaviour
+{
+    public Volume globalVolume;
+    public float minIntensity = 0.0f;
+    public float maxIntensity = 1.0f;
+    public float speed = 1.0f;
+
+    private Vignette vignette;
+
+    private void Start()
+    {
+        if (globalVolume.profile.TryGet(out vignette))
+        {
+            float initialIntensity = Random.Range(minIntensity, maxIntensity);
+            vignette.intensity.Override(initialIntensity);
+        }
+    }
+
+    private void Update()
+    {
+        if (globalVolume.profile.TryGet(out vignette))
+        {
+            float currentIntensity = vignette.intensity.value;
+            float newIntensity = Mathf.PingPong(Time.time * speed, maxIntensity - minIntensity) + minIntensity;
+            vignette.intensity.Override(newIntensity);
+        }
+    }
+}
