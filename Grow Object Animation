@@ -1,0 +1,34 @@
+using UnityEngine;
+
+public class GrowObjectAnimation : MonoBehaviour
+{
+    public float delay = 0.2f;
+    private Transform[] cubes;
+    private int currentIndex = 0;
+
+    private void Start()
+    {
+        cubes = GetComponentsInChildren<Transform>();
+
+        for (int i = 1; i < cubes.Length; i++)
+        {
+            cubes[i].gameObject.SetActive(false);
+        }
+
+        Invoke("ActivateNextCube", delay);
+    }
+
+    private void ActivateNextCube()
+    {
+        cubes[currentIndex].gameObject.SetActive(true);
+
+        currentIndex++;
+
+        if (currentIndex >= cubes.Length)
+        {
+            return;
+        }
+
+        Invoke("ActivateNextCube", delay);
+    }
+}
