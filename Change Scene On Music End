@@ -1,0 +1,57 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using System.Collections;
+
+public class ChangeSceneOnMusicEnd : MonoBehaviour
+{
+    public float fadeDuration = 1f;
+    public string nextScene;
+
+    private AudioSource audioSource;
+    private RawImage fadeImage;
+    private float currentAlpha = 0f;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+        fadeImage = CreateFadeImage();
+
+        Invoke("FadeOutAndLoadScene", audioSource.clip.length);
+    }
+
+    void FadeOutAndLoadScene()
+    {
+        StartCoroutine(FadeOutAndLoadSceneCoroutine());
+    }
+
+    IEnumerator FadeOutAndLoadSceneCoroutine()
+    {
+        while (currentAlpha < 1f)
+        {
+            currentAlpha += Time.deltaTime / fadeDuration;
+            fadeImage.color = new Color(0f, 0f, 0f, currentAlpha);
+            yield return null;
+        }
+        SceneManager.LoadScene(nextScene);
+    }
+
+    private RawImage CreateFadeImage()
+    {
+        GameObject fadeObj = new GameObject("FadeImage");
+        fadeObj.transform.SetParent(transform);
+        RectTransform rectTransform = fadeObj.AddComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+
+        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 999;
+
+        RawImage fadeRawImage = fadeObj.AddComponent<RawImage>();
+        fadeRawImage.color = new Color(0f, 0f, 0f, 0f);
+
+        return fadeRawImage;
+    }
+}
