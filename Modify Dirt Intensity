@@ -1,0 +1,32 @@
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+
+public class ModifyDirtIntensity : MonoBehaviour
+{
+    public Volume globalVolume;
+    public float minIntensity = 0.0f;
+    public float maxIntensity = 1.0f;
+    public float speed = 1.0f;
+
+    private Bloom bloom;
+
+    private void Start()
+    {
+        if (globalVolume.profile.TryGet(out bloom))
+        {
+            float initialIntensity = Random.Range(minIntensity, maxIntensity);
+            bloom.dirtIntensity.Override(initialIntensity);
+        }
+    }
+
+    private void Update()
+    {
+        if (globalVolume.profile.TryGet(out bloom))
+        {
+            float currentIntensity = bloom.dirtIntensity.value;
+            float newIntensity = Mathf.PingPong(Time.time * speed, maxIntensity - minIntensity) + minIntensity;
+            bloom.dirtIntensity.Override(newIntensity);
+        }
+    }
+}
