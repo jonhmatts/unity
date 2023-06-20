@@ -1,0 +1,40 @@
+using UnityEngine;
+
+public class RandomObjectPlacer : MonoBehaviour
+{
+    public GameObject objectPrefab;
+    public Vector2 placementAreaSize;
+    public int objectCount;
+    public Vector3 minScale = Vector3.one;
+    public Vector3 maxScale = Vector3.one;
+    public bool randomRotation = true;
+    public Vector3 rotationCorrection = new Vector3(-90f, 0f, 0f);
+
+    private void Start()
+    {
+        PlaceRandomObjects();
+    }
+
+    private void PlaceRandomObjects()
+    {
+        for (int i = 0; i < objectCount; i++)
+        {
+            Vector3 randomPosition = transform.position + new Vector3(Random.Range(-placementAreaSize.x, placementAreaSize.x), 0f, Random.Range(-placementAreaSize.y, placementAreaSize.y));
+
+           
+            GameObject newObject = Instantiate(objectPrefab, randomPosition, Quaternion.identity);
+
+            Vector3 randomScale = new Vector3(Random.Range(minScale.x, maxScale.x), Random.Range(minScale.y, maxScale.y), Random.Range(minScale.z, maxScale.z));
+            newObject.transform.localScale = randomScale;
+
+            if (randomRotation)
+            {
+                newObject.transform.rotation = Quaternion.Euler(rotationCorrection.x, Random.Range(0f, 360f), rotationCorrection.z);
+            }
+            else
+            {
+                newObject.transform.rotation = Quaternion.Euler(rotationCorrection);
+            }
+        }
+    }
+}
